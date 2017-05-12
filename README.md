@@ -26,7 +26,7 @@ trufflehog:
    services:
    - docker:dind
    script:
-     - docker run --rm -v $(pwd):/src registry.nocsi.org/trufflehog:latest file:///src >> trufflehog.txt
+     - docker run --rm -v $(pwd):/src nocsigroup/trufflehog:latest file:///src >> trufflehog.txt
    artifacts:
      name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
      when: on_success
