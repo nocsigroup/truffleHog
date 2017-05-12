@@ -1,27 +1,41 @@
-# Truffle Hog
-Searches through git repositories for high entropy strings, digging deep into commit history and branches. This is effective at finding secrets accidentally committed that contain high entropy.
+
+### truffleHog-CI
+
+Fork of [truffleHog](https://github.com/dxa4481/truffleHog) with needed unicode handling and other stuff. Also dockerized.
+
+### Build
 
 ```
-truffleHog https://github.com/dxa4481/truffleHog.git
+docker build -t trufflehog .
 ```
 
-or
+### Usage
 
 ```
-truffleHog file:///user/dxa4481/codeprojects/truffleHog/
+docker run --rm -v $(pwd):/src nocsigroup/trufflehog:latest file:///src >> trufflehog.txt
 ```
 
-![Example](https://i.imgur.com/YAXndLD.png)
 
-## Install
+### CI Usage
+
+Gitlab-CI
 ```
-pip install truffleHog
+trufflehog:
+   stage: scan
+   dependencies: []
+   services:
+   - docker:dind
+   script:
+     - docker run --rm -v $(pwd):/src registry.nocsi.org/trufflehog:latest file:///src >> trufflehog.txt
+   artifacts:
+     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+     when: on_success
+     expire_in: 1 week
+     untracked: true
+     paths:
+     - ./trufflehog.txt 
+   tags:
+     - docker
+   except:
+     - master
 ```
-
-## How it works
-This module will go through the entire commit history of each branch, and check each diff from each commit, and evaluate the shannon entropy for both the base64 char set and hexidecimal char set for every blob of text greater than 20 characters comprised of those character sets in each diff. If at any point a high entropy string >20 characters is detected, it will print to the screen.
-
-## Wishlist
-
-- ~~A way to detect and not scan binary diffs~~
-- ~~Don't rescan diffs if already looked at in another branch~~
